@@ -1,5 +1,6 @@
 # Pruebas
 import unittest
+from __main__ import Materia
 
 # Casos de prueba
 class PruebaClaseEstudiante(unittest.TestCase):
@@ -40,4 +41,5 @@ class PruebaClaseEstudiante(unittest.TestCase):
 
 # ---------------------------------------------------
 # Ejecución de los casos de prueba
-unittest.main(argv=['', '-v', 'PruebaClaseEstudiante'], verbosity=2, exit=False)
+def prueba_clase_estudiante() -> None:
+    unittest.main(argv=['', '-v', 'PruebaClaseEstudiante'], verbosity=2, exit=False)
