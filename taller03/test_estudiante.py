@@ -58,9 +58,9 @@ class TestEstudiante(unittest.TestCase):
 
     
     def test_aprobo_con_mal_comienzo(self):
-        self.assertTrue(self.est.aprobo_con_mal_comiezo('Astronomia'))
-        self.assertTrue(self.est.aprobo_con_mal_comiezo('Historia'))
-        self.assertFalse(self.est.aprobo_con_mal_comiezo('Biologia'))
+        self.assertTrue(self.est.aprobo_con_mal_comienzo('Astronomia'))
+        self.assertTrue(self.est.aprobo_con_mal_comienzo('Historia'))
+        self.assertFalse(self.est.aprobo_con_mal_comienzo('Biologia'))
 
     
     def test_cant_mats_primer_corte(self):
