@@ -373,35 +373,53 @@ def leer_archivo_personas() -> Lista[Persona]:
         resultado.agregar(p)
     return resultado
 
+  
+# ---------------------------------------------------------------------
+@dataclass(frozen=True)
+class Departamento:
+    """
+    Clase que representa la información de un departamento de Colombia
+    """
+    nombre: str
+    cant_municipios: int
+    capital: str
+    superficie: float
+    poblacion: int
+    densidad: float
+    indice_desarrollo_humano: float
+    fecha_creacion: int
+    region: str
+
+
+# ---------------------------------------------------------------------
+
+def leer_archivo_departamentos() -> Lista[Departamento]:
+    """
+    Permite obtener una lista de departamentos a partir del archivo
+    de datos que se encuentra en github
+    :return: Una lista con la información de los departamentos
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/departamentos2.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    resultado = Lista[Departamento]()
+    for index, row in df.iterrows():
+        nombre = row["Departamento"]
+        municipios = row["Municipios"]
+        capital = row["Capital"]
+        superficie = row["Superficie"]
+        poblacion = row["Población"]
+        densidad = row["Densidad"]
+        idh = row["IDH6"]
+        fecha = row["Fecha de creación"]
+        region = row["Región"]
+        depto = Departamento(nombre, cant_municipios=municipios, capital=capital, superficie=superficie,
+                             poblacion=poblacion, densidad=densidad, indice_desarrollo_humano=idh, fecha_creacion=fecha,
+                             region=region)
+        resultado.agregar(depto)
+    return resultado
+
 
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
-    lista: Lista[int] = Lista()
-    lista.agregar(5)
-    lista.agregar(6)
-    lista.agregar(7)
-    lista.agregar(8)
-    lista.agregar(9)
-    lista.agregar(11)
-    lista.agregar(12)
-    lista.agregar(13)
-    print(lista.indice_elemento(10))
-    print(lista.indice_elemento(11))
-    lst = concatenar_listas(lista, lista)
-    print(lst)
-    for i in lista.indices:
-        print(lista[i])
-    print("Último", lista[-1])
-    lista[-1] = 10
-    print(lista)
-    lista.eliminar(indice=1)
-    print(lista)
-    list1: Lista[int] = crear_lista(2, 3, 4, 5, 6)
-    list2: Lista[int] = crear_lista(2, 3, 4, 5, 6)
-
-    print(list1)
-    print(list1 == list2)
-    print(lista == 3)
-
-    list3 = resto_lista(lista)
-    print(list3)
+    lst = leer_archivo_departamentos()
+    print(lst[0])
