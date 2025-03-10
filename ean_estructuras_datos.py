@@ -393,6 +393,23 @@ class Departamento:
 
 # ---------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class EquipoFutbol:
+    """Atributos"""
+    año: int
+    nombre: str
+    partidos_ganados_local: int
+    partidos_ganados_visitante: int
+    partidos_perdidos_local: int
+    partidos_perdidos_visitante: int
+    partidos_empatados: int
+    goles_local: int
+    goles_visitante: int
+    goles_en_contra: int 
+
+
+# ---------------------------------------------------------------------
+
 def leer_archivo_departamentos() -> Lista[Departamento]:
     """
     Permite obtener una lista de departamentos a partir del archivo
@@ -420,6 +437,34 @@ def leer_archivo_departamentos() -> Lista[Departamento]:
 
 
 # ---------------------------------------------------------------------
+
+def leer_archivo_equipos() -> Lista[EquipoFutbol]:
+    """
+    Permite obtener una lista con la información de los equipos de fútbol de la liga
+    :return: la lista de equipos de futbol
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/LaLiga.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    lista = Lista[EquipoFutbol]()
+    for index, row in df.iterrows():
+        año = int(row["season"][:4])
+        nombre = row["club"]
+        partidos_ganados_local = int(row["home_win"])
+        partidos_ganados_visitante = int(row["away_win"])
+        partidos_perdidos_local = int(row["home_loss"])
+        partidos_perdidos_visitante = int(row["away_loss"])
+        partidos_empatados = int(row["matches_drawn"])
+        goles_local = int(row["home_goals"])
+        goles_visitante = int(row["away_goals"])
+        goles_en_contra = int(row["goals_conceded"])
+        e = EquipoFutbol(año, nombre, partidos_ganados_local, partidos_ganados_visitante,
+                         partidos_perdidos_local, partidos_perdidos_visitante,
+                         partidos_empatados, goles_local, goles_visitante,
+                         goles_en_contra)
+        lista.agregar(e)
+    return lista
+
+# ---------------------------------------------------------------------
 if __name__ == '__main__':
-    lst = leer_archivo_departamentos()
+    lst = leer_archivo_equipos()
     print(lst[0])
