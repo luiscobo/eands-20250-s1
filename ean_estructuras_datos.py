@@ -262,6 +262,94 @@ def copiar_lista(lista: Lista[T]) -> Lista[T]:
         resultado.agregar(elemento)
     return resultado
 
+# ---------------------------------------------------------------------
+
+class Node(Generic[T]):
+    """"
+    Este es un nodo de la lista que se usará para guardar datos en la pila
+    """
+    def __init__(self, value: T):
+        self.info = value
+        self.siguiente = None
+
+
+class Pila(Generic[T]):
+    """
+    Una pila es una estructura de datos que sigue la filosofía de
+    LIFO, el primero que entra es el último en salir.
+    """
+
+    # Constructor
+    def __init__(self):
+        self.__cabeza = None
+
+    # Agregar un elemento
+    def apilar(self, elem: T) -> None:
+        nodo = Node(elem)
+        nodo.siguiente = self.__cabeza
+        self.__cabeza = nodo
+
+
+    # Elimina el primer elemento de la pila
+    def desapilar(self) -> None:
+        if self.__cabeza is None:
+            raise IndexError
+        self.__cabeza = self.__cabeza.siguiente
+
+
+    # Obtiene el primer elemento de la pila
+    @property
+    def tope(self) -> T:
+        if self.__cabeza is None:
+            raise IndexError
+        return self.__cabeza.info
+    
+
+    # Permite saber si la pila está vacía
+    @property
+    def vacia(self) -> bool:
+        return self.__cabeza == None
+    
+
+    # Crea una copia de la pila
+    def copiar(self) -> "Pila[T]":
+        copia = Pila[T]()
+        act = self.__cabeza
+        act_copia = None
+        while act:
+            nodo = Node(act.info)
+            if copia.__cabeza is None:
+                copia.__cabeza = nodo
+                act_copia = nodo
+            else:
+                act_copia.siguiente = nodo
+                act_copia = nodo
+            act = act.siguiente
+        return copia
+    
+
+    # Representación como str de la pila
+    def __str__(self):
+        act = self.__cabeza
+        out = ""
+        while act:
+            out += str(act.info) + " -> "
+            act = act.siguiente
+        return out if len(out) == 0 else out[:-4]
+    
+
+# ---------------------------------------------------------------------
+def crear_pila(*elementos: T) -> Pila[T]:
+    """
+    Permite crear una pila con los elementos recibidos como parámetro
+    :param elementos: los datos a guardar en la pila
+    :return: La nueva pila con los elementos recibidos
+    """
+    resultado = Pila[T]()
+    for elemento in elementos:
+        resultado.apilar(elemento)
+    return resultado
+
 
 # ---------------------------------------------------------------------
 import pandas as pd
@@ -466,5 +554,22 @@ def leer_archivo_equipos() -> Lista[EquipoFutbol]:
 
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
-    lst = leer_archivo_equipos()
-    print(lst[0])
+    pila = Pila[int]()
+    print(pila.vacia)
+    pila.apilar(3)
+    pila.apilar(5)
+    pila.apilar(10)
+    pila.apilar(12)
+    pila.apilar(18)
+    pila.apilar(6)
+    print(pila)
+    pilita = pila.copiar()
+    print(pilita)
+    pilita.desapilar()
+    print(pilita.vacia())
+    print(pilita.tope())
+    pila_personas = Pila[Persona]()
+    lp = leer_archivo_personas()
+    pila_personas.apilar(lp[0])
+    pila_personas.apilar(lp[1])
+    print(pila_personas.tope.nombre)
