@@ -498,6 +498,24 @@ class EquipoFutbol:
 
 # ---------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class Municipio:
+    """
+    Esta es la información de un municipio de Colombia
+    """
+    codigo: int
+    nombre: str
+    poblacion_urbana: int
+    poblacion_rural: int
+    departamento: str
+    es_capital: bool 
+
+    def poblacion_total(self) -> int:
+        return self.poblacion_rural + self.poblacion_urbana
+
+
+# ---------------------------------------------------------------------
+
 def leer_archivo_departamentos() -> Lista[Departamento]:
     """
     Permite obtener una lista de departamentos a partir del archivo
@@ -553,23 +571,69 @@ def leer_archivo_equipos() -> Lista[EquipoFutbol]:
     return lista
 
 # ---------------------------------------------------------------------
+
+def leer_archivo_municipios() -> Lista[Municipio]:
+    """
+    Permite obtener una lista con la información de los municipios de 
+    :return: la lista de equipos de futbol
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/municipios.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    lista = Lista[Municipio]()
+    for index, row in df.iterrows():
+        codigo = int(row["código"])
+        nombre = row["nombre"]
+        poblacion_urbana = int(row["poblaciónUrbana"])
+        poblacion_rural = int(row["poblaciónRural"])
+        departamento = row["departamento"]
+        es_capital = int(row["esCapital"]) == 1
+        m = Municipio(codigo=codigo, nombre=nombre, poblacion_rural=poblacion_rural,
+                      poblacion_urbana=poblacion_urbana, departamento=departamento,
+                      es_capital=es_capital)
+        lista.agregar(m)
+    return lista
+
+
+# ---------------------------------------------------------------------
+
+def pila_municipios() -> Pila[Municipio]:
+    """
+    Permite obtener una pila con la información de los municipios de 
+    :return: la lista de equipos de futbol
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/municipios.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    pila = Pila[Municipio]()
+    for index, row in df.iterrows():
+        codigo = int(row["código"])
+        nombre = row["nombre"]
+        poblacion_urbana = int(row["poblaciónUrbana"])
+        poblacion_rural = int(row["poblaciónRural"])
+        departamento = row["departamento"]
+        es_capital = int(row["esCapital"]) == 1
+        m = Municipio(codigo=codigo, nombre=nombre, poblacion_rural=poblacion_rural,
+                      poblacion_urbana=poblacion_urbana, departamento=departamento,
+                      es_capital=es_capital)
+        pila.apilar(m)
+    return pila
+
+
+# ---------------------------------------------------------------------
+from io import StringIO
+import shlex
+
+def dividir_expresion(expresion: str) -> Lista[str]:
+    """
+    Esta función toma una expresión y obtiene los
+    diferentes tokens que hacen parte de ella
+    """
+    inp = StringIO(expresion)
+    res = Lista[str]()
+    for elem in list(shlex.shlex(inp)):
+        res.agregar(elem)
+    return res
+
+# ---------------------------------------------------------------------
 if __name__ == '__main__':
-    pila = Pila[int]()
-    print(pila.vacia)
-    pila.apilar(3)
-    pila.apilar(5)
-    pila.apilar(10)
-    pila.apilar(12)
-    pila.apilar(18)
-    pila.apilar(6)
-    print(pila)
-    pilita = pila.copiar()
-    print(pilita)
-    pilita.desapilar()
-    print(pilita.vacia())
-    print(pilita.tope())
-    pila_personas = Pila[Persona]()
-    lp = leer_archivo_personas()
-    pila_personas.apilar(lp[0])
-    pila_personas.apilar(lp[1])
-    print(pila_personas.tope.nombre)
+    print(dividir_expresion("[a {b / (c - d) + e/( f + g)} - h]"))
+    
