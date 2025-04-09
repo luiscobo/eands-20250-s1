@@ -633,6 +633,14 @@ def dividir_expresion(expresion: str) -> Lista[str]:
         res.agregar(elem)
     return res
 
+
+# ---------------------------------------------------------------------
+# Funciones auxiliares
+
+def elevar(x: int, y: int) -> int:
+    return int(int(x) ** int(y))
+
+
 # ---------------------------------------------------------------------
 if __name__ == '__main__':
     print(dividir_expresion("[a {b / (c - d) + e/( f + g)} - h]"))
