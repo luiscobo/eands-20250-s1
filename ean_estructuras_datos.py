@@ -9,9 +9,10 @@
 # Fecha: Feb 11, 2025
 # Versión: 0.0.1 -> 11 de febrero de 2025
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+import math
+from math import sqrt
 # Definición de los tipos genéricos que usaremos
-from typing import TypeVar, Generic, List
+from typing import TypeVar, Generic, List, Optional
 
 T = TypeVar('T')
 
@@ -308,8 +309,7 @@ class Pila(Generic[T]):
     # Permite saber si la pila está vacía
     @property
     def vacia(self) -> bool:
-        return self.__cabeza == None
-    
+        return self.__cabeza is None
 
     # Crea una copia de la pila
     def copiar(self) -> "Pila[T]":
@@ -642,6 +642,262 @@ def elevar(x: int, y: int) -> int:
 
 
 # ---------------------------------------------------------------------
+
+class NodoArbin(Generic[T]):
+    """"
+    Este es un nodo de un árbol binario genérico
+    """
+    def __init__(self, info: T, izq: Optional["NodoArbin"] = None, der: Optional["NodoArbin"] = None):
+        self.info = info
+        self.izq = izq
+        self.der = der
+
+
+    def es_hoja(self) -> bool:
+        """
+        Permite saber si este árbol es una hoja o no
+        :return: true si el nodo no tiene hijos, y false en caso contrario
+        """
+        return self.izq is None and self.der is None
+
+
+def arbol_de_letras() -> NodoArbin[str]:
+    """
+    Permite crear un árbol de letras mayúsculas
+    :return:
+    """
+    return NodoArbin(
+        "A",
+        NodoArbin(
+            "B",
+            NodoArbin(
+                "D",
+                NodoArbin("G")
+            ),
+            NodoArbin(
+                "E",
+                NodoArbin("H"),
+                NodoArbin("I")
+            )
+        ),
+        NodoArbin(
+            "C",
+            None,
+            NodoArbin(
+                "F",
+                NodoArbin(
+                    "J",
+                    None,
+                    NodoArbin("K")
+                )
+            )
+        )
+    )
+
+
+def arbol_de_numeros() -> NodoArbin[int]:
+    return NodoArbin(
+        60,
+        NodoArbin(
+            41,
+            NodoArbin(
+                16,
+                None,
+                NodoArbin(25)
+            ),
+            NodoArbin(
+                53,
+                NodoArbin(
+                    46,
+                    NodoArbin(42)
+                ),
+                NodoArbin(55)
+            )
+        ),
+        NodoArbin(
+            74,
+            NodoArbin(
+                65,
+                NodoArbin(
+                    63,
+                    NodoArbin(62),
+                    NodoArbin(64)
+                ),
+                NodoArbin(70)
+            )
+        )
+    )
+
+
+def crear_arbol_de_lista(lista: Lista[T]) -> NodoArbin[T]:
+    """
+    Crea un árbol binario a partir de una lista
+    :param lista: la lista con los objetos
+    :return: el arbol binario
+    """
+    def crear_arbol_aux(lista: Lista[T], posicion: int) -> Optional[NodoArbin[T]]:
+        tam = lista.tam
+        if posicion >= tam:
+            return None
+        act = NodoArbin(lista[posicion])
+        pos_izq = 2 * posicion + 1
+        pos_der = 2 * posicion + 2
+        if pos_izq < tam:
+            act.izq = crear_arbol_aux(lista, pos_izq)
+        if pos_der < tam:
+            act.der = crear_arbol_aux(lista, pos_der)
+        return act
+
+    # ------------------------------------------------------------------------------
+    return crear_arbol_aux(lista, 0)
+
+
+def arbol_verbos() -> NodoArbin[str]:
+    """
+    Crea un árbol binario con verbos a partir de una lista
+    :return: el árbol binario con verbos
+    """
+    verbos = crear_lista("comer",
+        "cenar", "partir", "tener", "sufrir",
+        "internacionalizar", "exponer", "pedir",
+        "sanar", "mecer", "adolecer")
+    return crear_arbol_de_lista(verbos)
+
+
+def arbol_personas() -> NodoArbin[Persona]:
+    return  crear_arbol_de_lista(leer_archivo_personas())
+
+
+# ---------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Punto:
+    """
+    Esta clase representa un punto en el plano cartesiano
+    """
+    x: float
+    y: float
+
+    @property
+    def radio(self) -> float:
+        """
+        Obtiene la distancia al origen del punto
+        :return: la distancia al origen del punto
+        """
+        return sqrt(self.x ** 2 + self.y ** 2)
+
+
+    def distancia_al_origen(self) -> float:
+        return self.radio
+
+
+    @property
+    def angulo(self) -> float:
+        """
+        Retorna el angulo con el eje x del punto
+        :return: el ángulo
+        """
+        return math.atan2(self.y, self.x)
+
+
+    def cuadrante(self) -> int:
+        """
+        Obtener el cuadrante al que pertenece el punto
+        :return: 1, 2, 3 o 4 dependiendo del cuadrante al que pertenece el punto
+        """
+        if self.x >= 0:
+            if self.y >= 0:
+                return 1
+            else:
+                return 4
+        else:
+            if self.y >= 0:
+                return 2
+            else:
+                return 3
+
+
+def lista_de_puntos() -> Lista[Punto]:
+    return crear_lista(
+        Punto(15.0, -10.0),
+        Punto(5.0, 4.0),
+        Punto(-3.0, 15.0),
+        Punto(-8.0, -30.0),
+        Punto(-7.0, 25.0),
+        Punto(6.0, -70.0),
+        Punto(9.0, 10.0),
+        Punto(-8.0, -61.0),
+        Punto(90.0, -80.0),
+        Punto(-75.0, -80.0),
+        Punto(45.0, -77.0),
+        Punto(3.0, 4.0)
+    )
+
+
+def arbol_de_puntos() -> NodoArbin[Punto]:
+    return crear_arbol_de_lista(lista_de_puntos())
+
+
+# ---------------------------------------------------------------------
+
+# Otros árboles
+def arbol_de_departamentos() -> NodoArbin[Departamento]:
+    return crear_arbol_de_lista(leer_archivo_departamentos())
+
+def arbol_de_equipos() -> NodoArbin[EquipoFutbol]:
+    return crear_arbol_de_lista(leer_archivo_equipos())
+
+def arbol_de_municipios() -> NodoArbin[Municipio]:
+    return crear_arbol_de_lista(leer_archivo_municipios())
+
+# ---------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Producto:
+    codigo: int
+    categoria: int
+    nombre: str
+    modelo: str
+    descripcion: str
+    color: str
+    costo: float
+    precio: float
+
+
+    def ganancia(self) -> float:
+        """
+        Obtiene la ganancia de un producto
+        :return: la diferencia entre el precio y el costo
+        """
+        return self.precio - self.costo
+
+
+def lista_de_productos() -> Lista[Producto]:
+    """
+    Permite obtener una lista con la información de los productos
+    :return: la lista de productos del archivo
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/Product.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    lista = Lista[Producto]()
+    for index, row in df.iterrows():
+        codigo = int(row["ProductKey"])
+        categoria = int(row["ProductSubcategoryKey"])
+        nombre = row["ProductName"]
+        modelo = row["ModelName"]
+        descripcion = row["ProductDescription"]
+        color = row["ProductColor"]
+        costo = float(row["ProductCost"])
+        precio = float(row["ProductPrice"])
+        prod = Producto(codigo, categoria, nombre, modelo, descripcion, color, costo, precio)
+        lista.agregar(prod)
+    return lista
+
+
+def arbol_de_productos() -> NodoArbin[Producto]:
+    return crear_arbol_de_lista(lista_de_productos())
+
+
 if __name__ == '__main__':
-    print(dividir_expresion("[a {b / (c - d) + e/( f + g)} - h]"))
-    
+    arbolp = arbol_de_productos()
+    print(arbolp.info)
