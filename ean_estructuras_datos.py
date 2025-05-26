@@ -12,9 +12,13 @@
 import math
 from math import sqrt
 # Definición de los tipos genéricos que usaremos
-from typing import TypeVar, Generic, List, Optional
+from typing import TypeVar, Generic, List, Optional, Any
+from collections.abc import Callable
+from datetime import datetime
+
 
 T = TypeVar('T')
+R = TypeVar('R')
 
 
 # --------------------------------------------------------------------
@@ -203,6 +207,251 @@ class Lista(Generic[T]):
             return False
 
 
+    def con_cada_elemento_haga(self, accion: Callable[..., None]) -> 'Lista[T]':
+        """
+        Realiza la misma operación sobre cada elemento de la lista,
+        no modifica la lista original y la retorna
+        :param accion: la operación a realizar sobre cada elemento de la lista
+        :return: la lista original
+        """
+        for elemento in self.__datos:
+            accion(elemento)
+        return self
+
+
+    def filtrar(self, predicado: Callable[..., bool]) -> 'Lista[T]':
+        """
+        Obtiene una lista con los elementos de la lista que cumplen con el predicado
+        :param predicado: una función que devuelve True si el elemento cumple con el predicado
+        :return: la lista de los elementos que cumplen con el predicado
+        """
+        resultado = Lista[T]()
+        for elemento in self.__datos:
+            if predicado(elemento):
+                resultado.agregar(elemento)
+        return resultado
+
+
+    def seleccionar(self, selector: Callable[..., R]) -> 'Lista[R]':
+        """
+        Por cada elemento de la lista, aplica el selector y lo agrega a la lista de resultados
+        :param selector: la operación a realizar sobre cada elemento de la lista
+        :return: la lista conteniendo la aplicación del selector a cada elemento de la lista
+        """
+        resultado = Lista[R]()
+        for elemento in self.__datos:
+            resultado.agregar(selector(elemento))
+        return resultado
+
+
+    def transformar(self, selector: Callable[..., R]) -> 'Lista[R]':
+        """
+        Por cada elemento de la lista, aplica el selector y lo agrega a la lista de resultados
+        :param selector: la operación a realizar sobre cada elemento de la lista
+        :return: la lista conteniendo la aplicación del selector a cada elemento de la lista
+        """
+        resultado = Lista[R]()
+        for elemento in self.__datos:
+            resultado.agregar(selector(elemento))
+        return resultado
+
+
+    def acumular(self, valor_inicial: R, operacion: Callable[..., R]) -> R:
+        """
+        Acumula los diversos valores de la lista, arrancando en el valor
+        inicial y aplicando la operación de izquierda a derecha a cada
+        elemento de la lista
+        :param valor_inicial: el valor inicial del acumulador
+        :param operacion: la operación de acumulación a realizar sobre los elementos de la lista
+        :return: el último valor del acumulador
+        """
+        acumulador = valor_inicial
+        for elemento in self.__datos:
+            acumulador = operacion(acumulador, elemento)
+        return acumulador
+
+
+    def reducir(self, operacion: Callable[..., T]) -> T:
+        return self.acumular(self.primero, operacion)
+
+
+    def sumar(self, selector: Callable[..., int | float] = None) -> int | float:
+        """
+        Halla la suma de todos los elementos de la lista
+        :return: la suma de los elementos de la lista
+        """
+        if len(self.__datos) == 0:
+            return 0.0
+        if selector is None:
+            def selector(elemento):
+                return elemento
+        n = len(self.__datos)
+        suma = 0.0
+        for i in range(n):
+            elemento = selector(self.__datos[i])
+            if type(elemento) == int or type(elemento) == float:
+                suma += elemento
+            else:
+                raise "Solo podemos trabajar con valores numéricos"
+        return suma
+
+    def encontrar_primero(self, predicado: Callable[..., bool]) -> Optional[T]:
+        """
+        Obtiene el primer elemento de la lista que cumple con el predicado
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: el primer elemento de la lista que cumple con el predicado o None si no hay ninguno
+        """
+        for elemento in self.__datos:
+            if predicado(elemento):
+                return elemento
+        return None
+
+    def encontrar_ultimo(self, predicado: Callable[..., bool]) -> Optional[T]:
+        """
+        Obtiene el último elemento de la lista que cumple con el predicado
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: el último elemento de la lista que cumple con el predicado o None si no hay ninguno
+        """
+        for elemento in reversed(self.__datos):
+            if predicado(elemento):
+                return elemento
+        return None
+
+
+    def encontrar_posicion_primero(self, predicado: Callable[..., bool]) -> Optional[int]:
+        """
+        Obtiene la posición del primer elemento de la lista que cumple con el predicado
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: la posición del primer elemento de la lista que cumple con el predicado o None si no hay ninguno
+        """
+        for i in self.indices:
+            if predicado(self.__datos[i]):
+                return i
+        return None
+
+
+    def encontrar_posicion_ultimo(self, predicado: Callable[..., bool]) -> Optional[int]:
+        """
+        Obtiene la posición del último elemento de la lista que cumple con el predicado
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: la posición del último elemento de la lista que cumple con el predicado o None si no hay ninguno
+        """
+        pos_ultimo = None
+        for i in self.indices:
+            if predicado(self.__datos[i]):
+                pos_ultimo = i
+        return pos_ultimo
+
+
+    def mayor(self, menor_que: Callable[..., bool] = None) -> Optional[T]:
+        """
+        Obtiene el mayor elemento de la lista
+        :return: el elemento más grande de la lista. El objeto debe tener definido el operador <
+        """
+        if len(self.__datos) == 0:
+            return None
+        if menor_que is None:
+            def menor_que(elemento1: T, elemento2: T) -> bool:
+                return elemento1 < elemento2
+        mayor = self.__datos[0]
+        for elemento in self.__datos:
+            if menor_que(mayor, elemento):
+                mayor = elemento
+        return mayor
+
+
+    def menor(self, menor_que: Callable[..., bool] = None) -> Optional[T]:
+        """
+        Obtiene y retorna el menor elemento de la lista
+        :return: el elemento más pequeño de la lista. El objeto debe tener definido el operador <
+        """
+        if len(self.__datos) == 0:
+            return None
+        if menor_que is None:
+            def menor_que(elemento1: T, elemento2: T) -> bool:
+                return elemento1 < elemento2
+        menor = self.__datos[0]
+        for elemento in self.__datos:
+            if menor_que(elemento, menor):
+                menor = elemento
+        return menor
+
+
+
+    def promedio(self, selector: Callable[..., R] = None) -> float:
+        """
+        Halla el promedio de los elementos de la lista de acuerdo al selector escogido
+        :param selector: la operación a realizar sobre cada elemento de la lista. Si no se especifica, se
+                         tomará el valor del elemento.
+        :return: el promedio de los elementos de la lista
+        """
+        if len(self.__datos) == 0:
+            return 0.0
+        if selector is None:
+            def selector(elemento):
+                return elemento
+        n = len(self.__datos)
+        suma = 0.0
+        for i in range(n):
+            elemento = selector(self.__datos[i])
+            if type(elemento) == int or type(elemento) == float:
+                suma += elemento
+            else:
+                raise "Solo podemos trabajar con valores numéricos"
+        return suma / n
+
+
+    def contar(self, predicado: Callable[..., bool] = None) -> int:
+        """
+        Retorna la cantidad de elementos que cumplen con el predicado en la lista
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: la cantidad de elementos que cumplen con el predicado
+        """
+        if predicado is None:
+            return self.tam
+
+        cont = 0
+        for elemento in self.__datos:
+            if predicado(elemento):
+                cont += 1
+        return cont
+
+
+    def porcentaje(self, predicado: Callable[..., bool] = None) -> float:
+        """
+        Retorna el porcentaje de elementos en la lista que cumplen con el predicado
+        :param predicado: el predicado a aplicar a cada elemento de la lista
+        :return: el porcentaje de elementos que cumplen con el predicado
+        """
+        if predicado is None:
+            return 100.0
+
+        cont = 0
+        for elemento in self.__datos:
+            if predicado(elemento):
+                cont += 1
+        return 0.0 if cont == 0 else 100.0 * cont / len(self.__datos)
+
+
+    def ordenar(self, menor_que: Callable[..., bool] = None) -> 'Lista[T]':
+        """
+        Este método ordena la lista de acuerdo a lo que indique el parámetro
+        :param menor_que: indica el criterio de comparación de los elementos de la lista.
+        :return: la nueva lista ordenada, por el criterio dado.
+        """
+        lista = copiar_lista(self)
+        if menor_que is None:
+            def menor_que(elemento1: T, elemento2: T) -> bool:
+                return elemento1 < elemento2
+
+        for i in range(lista.tam - 1):
+            for j in range(i + 1, lista.tam):
+                if menor_que(lista[j], lista[i]):
+                    lista[i], lista[j] = lista[j], lista[i]
+
+        return lista
+
+
 # ---------------------------------------------------------------------
 
 def concatenar_listas(lista1: Lista[T], lista2: Lista[T]) -> Lista[T]:
@@ -250,7 +499,7 @@ def resto_lista(lista_original: Lista[T]) -> Lista[T]:
     return resultado
 
 
-def copiar_lista(lista: Lista[T]) -> Lista[T]:
+def copiar_lista(lista: Lista[T], inicio = 0, fin = None) -> Lista[T]:
     """
     Obtiene una copia idéntica de la lista que se recibe como
     parámetro.
@@ -258,7 +507,11 @@ def copiar_lista(lista: Lista[T]) -> Lista[T]:
     :return: una copia de la lista
     """
     resultado = Lista[T]()
-    for indice in lista.indices:
+    ini = inicio
+    final = lista.tam if fin is None else fin
+    if ini >= final:
+        raise "Imposible realizar la copia"
+    for indice in range(ini, final):
         elemento = lista[indice]
         resultado.agregar(elemento)
     return resultado
@@ -444,7 +697,7 @@ def leer_archivo_personas() -> Lista[Persona]:
     resultado = Lista[Persona]()
     for index, row in df.iterrows():
         cedula = row["Cedula"]
-        nombre = row["Nombres"]
+        nombre = row["Nombres"].upper()
         edad = row["Edad"]
         genero = row["Genero"]
         num_hijos = row["No de hijos"]
@@ -897,7 +1150,130 @@ def lista_de_productos() -> Lista[Producto]:
 def arbol_de_productos() -> NodoArbin[Producto]:
     return crear_arbol_de_lista(lista_de_productos())
 
+# ----------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class Carro:
+    codigo: int
+    modelo: str
+    año: int
+    precio: int
+    transmision: str
+    kilometraje: int
+    tipo_combustible: str
+    cilindraje: float
+    fabricante: str
+
+    def edad(self) -> int:
+        """"
+        Determina el número de años que ha sido fabricado el carro
+        """
+        hoy = datetime.now()
+        anio = hoy.year
+        return anio - self.año
+
+
+def lista_de_carros_usados(n: int = 10) -> Lista[Carro]:
+    """
+    Permite obtener una lista con la información de los carros
+    :return: la lista de carros del archivo
+    """
+    archivo = "https://raw.githubusercontent.com/luiscobo/poo/refs/heads/main/cars_dataset.csv"
+    df = pd.read_csv(archivo, encoding="utf-8")
+    lista = Lista[Carro]()
+    i = 1
+    for index, row in df.iterrows():
+        modelo = row["model"].upper().strip()
+        año = int(row["year"])
+        precio = int(row["price"])
+        transmision = "MANUAL" if row["transmission"] == "Manual" else "AUTOMATICA" if row["transmission"] == "Automatic" else "SEMIAUTOMATICA"
+        kilometraje = int(row["mileage"])
+        tipo_combustible = "GASOLINA" if row["fuelType"] == "Petrol" else "ACPM" if row["fuelType"] == "Diesel" else "ELECTRICO"
+        cilindraje = float(row["engineSize"])
+        fabricante = row["Make"].upper()
+        carro = Carro(i, modelo, año, precio, transmision, kilometraje, tipo_combustible, cilindraje, fabricante)
+        lista.agregar(carro)
+        i += 1
+        if i > n:
+            break
+    return lista
+
+# ---------------------------------------------------------------------
+
+def es_menor_que(objeto1, objeto2, atributos: str = None) -> bool:
+    """
+    Permite saber si el objeto1 es mas pequeño que el objeto2 de acuerdo a los atributos
+    :param objeto1: el primer objeto
+    :param objeto2: el segundo objeto
+    :param atributos: un string con los nombres de los atributos de la clase
+    :return: True si el objeto1 < objeto2, False si no
+    """
+    if type(objeto1) != type(objeto2):
+        return False
+    if atributos is None:
+        return objeto1 < objeto2
+    else:
+        nombre_attrs = [atrib.strip() for atrib in atributos.split(",")]
+        for nombre_attr in nombre_attrs:
+            if nombre_attr.endswith(")"):
+                nomatrib = nombre_attr.split("(")[0].strip()
+            else:
+                nomatrib = nombre_attr
+            if not hasattr(objeto1, nomatrib):
+                raise f"El objeto no tiene el atributo {nomatrib}"
+            if not hasattr(objeto2, nomatrib):
+                raise f"El objeto no tiene el atributo {nomatrib}"
+            if nombre_attr.endswith(")"):
+                valor1 = getattr(objeto1, nomatrib)()
+                valor2 = getattr(objeto2, nomatrib)()
+            else:
+                valor1 = getattr(objeto1, nomatrib)
+                valor2 = getattr(objeto2, nomatrib)
+            if valor1 < valor2:
+                return True
+            if valor1 > valor2:
+                return False
+        return False  # Son iguales
+
+
+def son_iguales(objeto1, objeto2, atributos: str = None) -> bool:
+    """
+    Permite saber si el objeto1 es igual que el objeto2 de acuerdo a los atributos
+    :param objeto1: el primer objeto
+    :param objeto2: el objeto 2
+    :param atributos: una lista de atributos y métotdos usados como criterios de comparación
+    :return: True si el objeto1 es igual a la objeto 2 de acuedo con los atributos.
+    """
+    if type(objeto1) != type(objeto2):
+        return False
+    if atributos is None:
+        return objeto1 == objeto2
+    else:
+        nombre_attrs = [atrib.strip() for atrib in atributos.split(",")]
+        for nombre_attr in nombre_attrs:
+            if nombre_attr.endswith(")"):
+                nomatrib = nombre_attr.split("(")[0].strip()
+            else:
+                nomatrib = nombre_attr
+            if not hasattr(objeto1, nomatrib):
+                raise f"El objeto no tiene el atributo {nomatrib}"
+            if not hasattr(objeto2, nomatrib):
+                raise f"El objeto no tiene el atributo {nomatrib}"
+            if nombre_attr.endswith(")"):
+                valor1 = getattr(objeto1, nomatrib)()
+                valor2 = getattr(objeto2, nomatrib)()
+            else:
+                valor1 = getattr(objeto1, nomatrib)
+                valor2 = getattr(objeto2, nomatrib)
+            if valor1 != valor2:
+                return False
+
+        return True  # Son iguales
+
 
 if __name__ == '__main__':
-    arbolp = arbol_de_productos()
-    print(arbolp.info)
+    lc = lista_de_carros_usados()
+    print(lc.tam)
+    print(lc[0])
+    print(lc[1].edad())
+
