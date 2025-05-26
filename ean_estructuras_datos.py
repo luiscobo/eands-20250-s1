@@ -295,6 +295,7 @@ class Lista(Generic[T]):
                 raise "Solo podemos trabajar con valores numéricos"
         return suma
 
+    
     def encontrar_primero(self, predicado: Callable[..., bool]) -> Optional[T]:
         """
         Obtiene el primer elemento de la lista que cumple con el predicado
@@ -306,6 +307,7 @@ class Lista(Generic[T]):
                 return elemento
         return None
 
+    
     def encontrar_ultimo(self, predicado: Callable[..., bool]) -> Optional[T]:
         """
         Obtiene el último elemento de la lista que cumple con el predicado
@@ -343,7 +345,7 @@ class Lista(Generic[T]):
         return pos_ultimo
 
 
-    def mayor(self, menor_que: Callable[..., bool] = None) -> Optional[T]:
+    def mayor(self, menor_que: Callable[..., bool] = None, atributo: str = None) -> Optional[T]:
         """
         Obtiene el mayor elemento de la lista
         :return: el elemento más grande de la lista. El objeto debe tener definido el operador <
@@ -351,8 +353,11 @@ class Lista(Generic[T]):
         if len(self.__datos) == 0:
             return None
         if menor_que is None:
-            def menor_que(elemento1: T, elemento2: T) -> bool:
-                return elemento1 < elemento2
+            if atributo is None:
+                def menor_que(elemento1: T, elemento2: T) -> bool:
+                    return elemento1 < elemento2
+            else:
+                menor_que = lambda e1, e2: es_menor_que(e1, e2, atributo)
         mayor = self.__datos[0]
         for elemento in self.__datos:
             if menor_que(mayor, elemento):
@@ -360,7 +365,7 @@ class Lista(Generic[T]):
         return mayor
 
 
-    def menor(self, menor_que: Callable[..., bool] = None) -> Optional[T]:
+    def menor(self, menor_que: Callable[..., bool] = None, atributo: str = None) -> Optional[T]:
         """
         Obtiene y retorna el menor elemento de la lista
         :return: el elemento más pequeño de la lista. El objeto debe tener definido el operador <
@@ -368,8 +373,11 @@ class Lista(Generic[T]):
         if len(self.__datos) == 0:
             return None
         if menor_que is None:
-            def menor_que(elemento1: T, elemento2: T) -> bool:
-                return elemento1 < elemento2
+            if atributo is None:
+                def menor_que(elemento1: T, elemento2: T) -> bool:
+                    return elemento1 < elemento2
+            else:
+                menor_que = lambda x, y: es_menor_que(x, y, atributo)
         menor = self.__datos[0]
         for elemento in self.__datos:
             if menor_que(elemento, menor):
@@ -433,7 +441,7 @@ class Lista(Generic[T]):
         return 0.0 if cont == 0 else 100.0 * cont / len(self.__datos)
 
 
-    def ordenar(self, menor_que: Callable[..., bool] = None) -> 'Lista[T]':
+    def ordenar(self, menor_que: Callable[..., bool] = None, atributo: str = None) -> 'Lista[T]':
         """
         Este método ordena la lista de acuerdo a lo que indique el parámetro
         :param menor_que: indica el criterio de comparación de los elementos de la lista.
@@ -441,8 +449,11 @@ class Lista(Generic[T]):
         """
         lista = copiar_lista(self)
         if menor_que is None:
-            def menor_que(elemento1: T, elemento2: T) -> bool:
-                return elemento1 < elemento2
+            if atributo is None:
+                def menor_que(elemento1: T, elemento2: T) -> bool:
+                    return elemento1 < elemento2
+            else:
+                menor_que = lambda x, y: es_menor_que(x, y, atributo)
 
         for i in range(lista.tam - 1):
             for j in range(i + 1, lista.tam):
@@ -450,6 +461,14 @@ class Lista(Generic[T]):
                     lista[i], lista[j] = lista[j], lista[i]
 
         return lista
+
+
+    def invertir(self) -> 'Lista[T]':
+        resultado = Lista[T]()
+        for indice in range(self.tam):
+            elemento = self.__datos[indice]
+            resultado.insertar_al_principio(elemento)
+        return resultado
 
 
 # ---------------------------------------------------------------------
